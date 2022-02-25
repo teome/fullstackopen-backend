@@ -30,6 +30,13 @@ app.get('/api/persons', (request, response) => {
   response.json(persons)
 })
 
+app.get('/api/info', (request, response) => {
+  const datetime = new Date()
+  const responseStr = `<p>Phonebook has info for ${persons.length} people</br></br>${datetime}</p>`
+
+  response.status(200).end(responseStr)
+})
+
 const generateId = () => {
   const maxId = persons.length > 0 ? Math.max(...persons.map(n => n.id)) : 0
   return maxId + 1
