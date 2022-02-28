@@ -1,4 +1,5 @@
 const express = require('express')
+const { json } = require('express/lib/response')
 
 const app = express()
 app.use(express.json())
@@ -35,6 +36,17 @@ app.get('/info', (request, response) => {
   const responseStr = `<p>Phonebook has info for ${persons.length} people</br></br>${datetime}</p>`
 
   response.status(200).end(responseStr)
+})
+
+app.get('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  const person = persons.find(p => p.id === id)
+  if (person) {
+    response.json(person)
+  } else {
+    response.statusMessage = `No person found for ID ${id}`
+    response.status(400).end()
+  }
 })
 
 const generateId = () => {
