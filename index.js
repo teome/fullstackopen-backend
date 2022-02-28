@@ -1,10 +1,11 @@
+const { application } = require('express')
 const express = require('express')
 const { json } = require('express/lib/response')
 
 const app = express()
 app.use(express.json())
 
-const persons = [
+let persons = [
   {
     id: 1,
     name: 'Arto Hellas',
@@ -46,6 +47,18 @@ app.get('/api/persons/:id', (request, response) => {
   } else {
     response.statusMessage = `No person found for ID ${id}`
     response.status(400).end()
+  }
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  const lengthBefore = persons.length
+  persons = persons.filter(person => person.id !== id)
+  if (lengthBefore === persons.length) {
+    response.statusMessage = `No person found for if ${id}`
+    response.status(400).end()
+  } else {
+    response.status(204).end()
   }
 })
 
