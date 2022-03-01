@@ -74,16 +74,18 @@ const generateRandomId = () => {
 
 app.post('/api/persons', (request, response) => {
   const body = request.body
+
+  let errorJson = null
   if (!body.name) {
-    return response.status(400).json({ error: 'name missing' })
+    errorJson = { error: 'name missing' }
+  } else if (!body.number) {
+    errorJson = { error: 'number missing' }
+  } else if (persons.some(person => person.name === body.name)) {
+    errorJson = { error: `The name already exists in the DB: ${body.name}` }
   }
-  if (!body.number) {
-    return response.status(400).json({ error: 'number missing' })
-  }
-  if (persons.some(person => person.name === body.name)) {
-    return response
-      .status(400)
-      .json({ error: `The name already exists in the DB: ${body.name}` })
+
+  if (errorJson) {
+    return response.status(400).json(errorJson)
   }
 
   const person = {
