@@ -1,8 +1,10 @@
+require('dotenv').config()
 const { application } = require('express')
 const express = require('express')
 const { json } = require('express/lib/response')
 const morgan = require('morgan')
 const cors = require('cors')
+const mongoose = require('mongoose')
 
 const app = express()
 app.use(express.json())
@@ -18,6 +20,20 @@ app.use(
     ':method :url :status :res[content-length] - :response-time ms :reqbody'
   )
 )
+
+/**
+ * MongoDB setup
+ */
+const url = process.env.MONGO_URI
+
+mongoose.connect(url)
+
+const personSchema = new mongoose.Schema({
+  name: String,
+  number: String,
+})
+
+const Person = mongoose.model('Person', personSchema)
 
 let persons = [
   {
@@ -111,7 +127,7 @@ app.post('/api/persons', (request, response) => {
   response.json(person)
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
