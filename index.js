@@ -59,14 +59,7 @@ app.get('/api/persons', (request, response) => {
 })
 
 app.get('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(p => p.id === id)
-  if (person) {
-    response.json(person)
-  } else {
-    response.statusMessage = `No person found for ID ${id}`
-    response.status(400).end()
-  }
+  Person.findById(request.params.id).then(person => response.json(person))
 })
 
 app.delete('/api/persons/:id', (request, response) => {
@@ -99,21 +92,21 @@ app.post('/api/persons', (request, response) => {
     errorJson = { error: 'name missing' }
   } else if (!body.number) {
     errorJson = { error: 'number missing' }
-  } else if (persons.some(person => person.name === body.name)) {
-    errorJson = { error: `The name already exists in the DB: ${body.name}` }
   }
+  // else if (persons.some(person => person.name === body.name)) {
+  //   errorJson = { error: `The name already exists in the DB: ${body.name}` }
+  // }
 
   if (errorJson) {
     return response.status(400).json(errorJson)
   }
 
-  const person = {
+  const person = new Person({
     name: body.name,
     number: body.number,
-    id: generateRandomId(),
-  }
-  persons = persons.concat(person)
-  response.json(person)
+  })
+
+  person.save().then(savedPerson => response.json(savedPerson))
 })
 
 const PORT = process.env.PORT
