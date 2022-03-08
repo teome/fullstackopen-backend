@@ -53,7 +53,6 @@ app.get('/info', (request, response) => {
 
 app.get('/api/persons', (request, response) => {
   Person.find({}).then(persons => {
-    console.log(response)
     response.json(persons)
   })
 })
@@ -86,7 +85,7 @@ const generateRandomId = () => {
   return Math.floor(Math.random() * (2 ** 31 - 1))
 }
 
-app.post('/api/persons', (request, response) => {
+app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
   let errorJson = null
@@ -95,20 +94,18 @@ app.post('/api/persons', (request, response) => {
   } else if (!body.number) {
     errorJson = { error: 'number missing' }
   }
-  // else if (persons.some(person => person.name === body.name)) {
-  //   errorJson = { error: `The name already exists in the DB: ${body.name}` }
-  // }
-
   if (errorJson) {
     return response.status(400).json(errorJson)
   }
 
-  const person = new Person({
+  const personObj = {
     name: body.name,
     number: body.number,
-  })
+  }
 
-  person.save().then(savedPerson => response.json(savedPerson))
+  Person.findOneAndUpdate({ name: body.name }, personObj, { upsert: true })
+    .then(person => response.json(person))
+    .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
