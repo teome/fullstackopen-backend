@@ -44,11 +44,14 @@ let persons = [
   },
 ]
 
-app.get('/info', (request, response) => {
-  const datetime = new Date()
-  const responseStr = `<p>Phonebook has info for ${persons.length} people</br></br>${datetime}</p>`
-
-  response.status(200).end(responseStr)
+app.get('/info', (request, response, next) => {
+  Person.count({})
+    .then(count => {
+      const datetime = new Date()
+      const responseStr = `<p>Phonebook has info for ${count} people</br></br>${datetime}</p>`
+      response.status(200).end(responseStr)
+    })
+    .catch(error => next(error))
 })
 
 app.get('/api/persons', (request, response) => {
