@@ -62,16 +62,10 @@ app.get('/api/persons/:id', (request, response) => {
   Person.findById(request.params.id).then(person => response.json(person))
 })
 
-app.delete('/api/persons/:id', (request, response) => {
-  const id = Number(request.params.id)
-  const lengthBefore = persons.length
-  persons = persons.filter(person => person.id !== id)
-  if (lengthBefore === persons.length) {
-    response.statusMessage = `No person found for if ${id}`
-    response.status(400).end()
-  } else {
-    response.status(204).end()
-  }
+app.delete('/api/persons/:id', (request, response, next) => {
+  Person.findByIdAndRemove(request.params.id)
+    .then(result => response.status(204).end())
+    .catch(error => next(error))
 })
 
 const generateId = () => {
