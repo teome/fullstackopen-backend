@@ -88,6 +88,23 @@ const generateRandomId = () => {
   return Math.floor(Math.random() * (2 ** 31 - 1))
 }
 
+app.put('/api/persons/:id', (request, response, next) => {
+  const body = request.body
+  if (!body.name) {
+    return response.status(400).send({ error: 'missing name' })
+  } else if (!body.number) {
+    return response.status(400).send({ error: 'missing number' })
+  }
+
+  const person = {
+    name: body.name,
+    number: body.number,
+  }
+  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+    .then(updatedPerson => response.json(updatedPerson))
+    .catch(error => next(error))
+})
+
 app.post('/api/persons', (request, response, next) => {
   const body = request.body
 
@@ -106,7 +123,10 @@ app.post('/api/persons', (request, response, next) => {
     number: body.number,
   }
 
-  Person.findOneAndUpdate({ name: body.name }, personObj, { upsert: true })
+  Person.findOneAndUpdate({ name: body.name }, personObj, {
+    upsert: true,
+    new: true,
+  })
     .then(person => response.json(person))
     .catch(error => next(error))
 })
