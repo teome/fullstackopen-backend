@@ -5,6 +5,7 @@ const { json } = require('express/lib/response')
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
+const person = require('./models/person')
 
 const app = express()
 app.use(express.static('build'))
@@ -122,19 +123,38 @@ app.post('/api/persons', (request, response, next) => {
     return response.status(400).json(errorJson)
   }
 
-  const personObj = {
-    name: body.name,
-    number: body.number,
-  }
-
-  Person.findOneAndUpdate({ name: body.name }, personObj, {
-    upsert: true,
-    new: true,
-    runValidators: true,
-    context: 'query',
-  })
-    .then(person => response.json(person))
+  Person.findOne({ name: body.name })
+    .then(person => {
+      if (person) {
+        response
+          .status(400)
+          .json({ error: `Person '${body.name}' already exists` })
+      } else {
+        const newPerson = new Person({
+          name: body.name,
+          number: body.number,
+        })
+        newPerson
+          .save()
+          .then(savedPerson => response.json(savedPerson))
+          .catch(error => response.status(400).json({ error: error.message }))
+      }
+    })
     .catch(error => next(error))
+
+  // const personObj = {
+  //   name: body.name,
+  //   number: body.number,
+  // }
+
+  // Person.findOneAndUpdate({ name: body.name }, personObj, {
+  //   upsert: true,
+  //   new: true,
+  //   runValidators: true,
+  //   context: 'query',
+  // })
+  //   .then(person => response.json(person))
+  //   .catch(error => next(error))
 })
 
 const unknownEndpoint = (request, response) => {
