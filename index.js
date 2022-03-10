@@ -100,7 +100,11 @@ app.put('/api/persons/:id', (request, response, next) => {
     name: body.name,
     number: body.number,
   }
-  Person.findByIdAndUpdate(request.params.id, person, { new: true })
+  Person.findByIdAndUpdate(request.params.id, person, {
+    new: true,
+    runValidators: true,
+    context: 'query',
+  })
     .then(updatedPerson => response.json(updatedPerson))
     .catch(error => next(error))
 })
@@ -126,6 +130,8 @@ app.post('/api/persons', (request, response, next) => {
   Person.findOneAndUpdate({ name: body.name }, personObj, {
     upsert: true,
     new: true,
+    runValidators: true,
+    context: 'query',
   })
     .then(person => response.json(person))
     .catch(error => next(error))
@@ -141,6 +147,9 @@ const errorHandler = (error, request, response, next) => {
 
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
+  }
+  if (error.name === 'ValidationError') {
+    return response.status(400).send({ error: error.message })
   }
 
   next(error)
