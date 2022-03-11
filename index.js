@@ -1,11 +1,9 @@
 require('dotenv').config()
-const { application } = require('express')
 const express = require('express')
 const { json } = require('express/lib/response')
 const morgan = require('morgan')
 const cors = require('cors')
 const Person = require('./models/person')
-const person = require('./models/person')
 
 const app = express()
 app.use(express.static('build'))
@@ -21,29 +19,6 @@ app.use(
     ':method :url :status :res[content-length] - :response-time ms :reqbody'
   )
 )
-
-let persons = [
-  {
-    id: 1,
-    name: 'Arto Hellas',
-    number: '040-123456',
-  },
-  {
-    id: 2,
-    name: 'Ada Lovelace',
-    number: '39-44-5323523',
-  },
-  {
-    id: 3,
-    name: 'Dan Abramov',
-    number: '12-43-234345',
-  },
-  {
-    id: 4,
-    name: 'Mary Poppendieck',
-    number: '39-23-6423122',
-  },
-]
 
 app.get('/info', (request, response, next) => {
   Person.count({})
@@ -79,15 +54,15 @@ app.delete('/api/persons/:id', (request, response, next) => {
     .catch(error => next(error))
 })
 
-const generateId = () => {
-  const maxId =
-    persons.length > 0 ? Math.max(...persons.map(person => person.id)) : 0
-  return maxId + 1
-}
+// const generateId = () => {
+//   const maxId =
+//     persons.length > 0 ? Math.max(...persons.map(person => person.id)) : 0
+//   return maxId + 1
+// }
 
-const generateRandomId = () => {
-  return Math.floor(Math.random() * (2 ** 31 - 1))
-}
+// const generateRandomId = () => {
+//   return Math.floor(Math.random() * (2 ** 31 - 1))
+// }
 
 app.put('/api/persons/:id', (request, response, next) => {
   const body = request.body
